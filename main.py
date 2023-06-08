@@ -1,39 +1,38 @@
-import discord
 import os
-import datetime
+from discord.ext import commands
 from datetime import date
+import discord
 from keep_alive import keep_alive
 
-client = discord.Client()
+bot = commands.Bot(intents=discord.Intents.all(), command_prefix='!')
 
-@client.event
+
+@bot.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+  print('We have logged in as {0.user}'.format(bot))
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
 
-    if message.content.startswith('!friday'):
-      today = date.today().weekday()
-      #friday = today + datetime.timedelta((4-today.weekday())%7)
-      #f = today - datetime.timedelta(friday)
-      #f = f.strftime("%d %H %M")
-      if today == 4:
-        await message.channel.send('ITS FRIDAY THEEEEEEEN https://www.youtube.com/watch?v=cjgldht4PKw') 
-      elif today == 5: 
-        await message.channel.send('It is not Friday, my pana :(')
-        await message.channel.send('Todavia quedan 6 días')
-      elif today == 6: 
-        await message.channel.send('It is not Friday, my pana :(')
-        await message.channel.send('Todavia quedan 5 días')
-      elif today == 3: 
-        await message.channel.send('Ve calentando, mi pana...')
-      else: 
-        fridays = 4 - today%4
-        await message.channel.send('It is not Friday, my pana :(')
-        await message.channel.send('Todavia quedan '+ str(fridays) + "días")
+@bot.command()
+async def friday(ctx) -> None:
+  today = date.today().weekday()
+  days_until_friday = (4 - today) % 7
+
+  messages = {
+    0: "ITS FRIDAY THEEEEEEEN https://www.youtube.com/watch?v=cjgldht4PKw",
+    6: "It is not Friday, my pana :(\nTodavia quedan 6 días",
+    5: "It is not Friday, my pana :(\nTodavia quedan 5 días",
+    4: "It is not Friday, my pana :(\nTodavia quedan 4 días",
+    3: "It is not Friday, my pana :(\nTodavia quedan 3 días",
+    2: "It is not Friday, my pana :(\nTodavia quedan 2 días",
+    1: "Ve calentando, mi pana...",
+  }
+
+  if days_until_friday in messages:
+    await ctx.channel.send(messages[days_until_friday])
+  else:
+    await ctx.channel.send(
+      f"It is not Friday, my pana :(\nTodavia quedan {days_until_friday} días")
+
 
 keep_alive()
-client.run(os.getenv('TOKEN'))
+bot.run(os.getenv('TOKEN'))
